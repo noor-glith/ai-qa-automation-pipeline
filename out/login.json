@@ -1,0 +1,334 @@
+{
+  "epic": {
+    "summary": "User Authentication - Email & Password Login",
+    "description": "Allow registered users to sign in securely with email and password, including account lockout protection, persistent sessions via Remember Me, and accessible password entry.",
+    "jira_key": "AUT-1"
+  },
+  "story": {
+    "summary": "As a registered user I want to log in with my email and password so that I can access my dashboard",
+    "description": "Login page with email and password fields, a show/hide password toggle and a Remember Me option. Five failed attempts within 15 minutes lock the account for 15 minutes. Successful login redirects to /dashboard.",
+    "acceptance_criteria": [
+      "Given a registered user with valid credentials, When they submit the login form, Then they are redirected to /dashboard",
+      "Given the email or password field is empty, When the user submits, Then a required-field error is shown and no login request is made",
+      "Given 5 failed login attempts within 15 minutes, When the user tries again, Then the account is locked for 15 minutes",
+      "Given Remember Me is checked, When the user logs in, Then they stay signed in for 30 days",
+      "Given the password field, When the user types, Then characters are masked, And the show/hide toggle reveals or hides them"
+    ],
+    "jira_key": "AUT-2"
+  },
+  "test_cases": [
+    {
+      "id": "TC-001",
+      "title": "Login with valid email and password",
+      "type": "positive",
+      "priority": "High",
+      "preconditions": "Registered, active user account exists",
+      "steps": [
+        "Open the login page",
+        "Enter a valid registered email",
+        "Enter the correct password",
+        "Click Log in"
+      ],
+      "test_data": "Email: qa.user@example.com, Password: Valid@1234",
+      "expected_result": "User is authenticated and redirected to /dashboard",
+      "jira_key": "AUT-3"
+    },
+    {
+      "id": "TC-002",
+      "title": "Submit with empty email and password",
+      "type": "negative",
+      "priority": "High",
+      "preconditions": "User is on the login page",
+      "steps": [
+        "Leave email and password empty",
+        "Click Log in"
+      ],
+      "test_data": "",
+      "expected_result": "Required-field errors are shown for both fields; no login request is sent; user stays on login page",
+      "jira_key": "AUT-4"
+    },
+    {
+      "id": "TC-003",
+      "title": "Submit with email only (password empty)",
+      "type": "negative",
+      "priority": "Medium",
+      "preconditions": "User is on the login page",
+      "steps": [
+        "Enter a valid email",
+        "Leave password empty",
+        "Click Log in"
+      ],
+      "test_data": "Email: qa.user@example.com",
+      "expected_result": "Password required error is shown; login is not attempted",
+      "jira_key": "AUT-5"
+    },
+    {
+      "id": "TC-004",
+      "title": "Submit with password only (email empty)",
+      "type": "negative",
+      "priority": "Medium",
+      "preconditions": "User is on the login page",
+      "steps": [
+        "Leave email empty",
+        "Enter a password",
+        "Click Log in"
+      ],
+      "test_data": "Password: Valid@1234",
+      "expected_result": "Email required error is shown; login is not attempted",
+      "jira_key": "AUT-6"
+    },
+    {
+      "id": "TC-005",
+      "title": "Login with wrong password",
+      "type": "negative",
+      "priority": "High",
+      "preconditions": "Registered user account exists",
+      "steps": [
+        "Enter a valid registered email",
+        "Enter an incorrect password",
+        "Click Log in"
+      ],
+      "test_data": "Email: qa.user@example.com, Password: Wrong@999",
+      "expected_result": "Generic error such as 'Invalid email or password' is shown; user stays on login page",
+      "jira_key": "AUT-7"
+    },
+    {
+      "id": "TC-006",
+      "title": "Login with unregistered email shows same generic error",
+      "type": "security",
+      "priority": "High",
+      "preconditions": "Email is not registered",
+      "steps": [
+        "Enter an unregistered email",
+        "Enter any password",
+        "Click Log in",
+        "Compare the error with TC-005"
+      ],
+      "test_data": "Email: nobody.here@example.com, Password: Any@1234",
+      "expected_result": "Same generic error message and similar response time as TC-005, so it does not reveal whether the account exists",
+      "jira_key": "AUT-8"
+    },
+    {
+      "id": "TC-007",
+      "title": "Invalid email format is rejected",
+      "type": "negative",
+      "priority": "Medium",
+      "preconditions": "User is on the login page",
+      "steps": [
+        "Enter a malformed email",
+        "Enter a password",
+        "Click Log in"
+      ],
+      "test_data": "Emails: plainaddress, user@, @example.com, user@@example.com",
+      "expected_result": "Validation error for invalid email format is shown for each value",
+      "jira_key": "AUT-9"
+    },
+    {
+      "id": "TC-008",
+      "title": "Account locks after 5 failed attempts within 15 minutes",
+      "type": "negative",
+      "priority": "High",
+      "preconditions": "Registered user account with no recent failed attempts",
+      "steps": [
+        "Enter valid email with wrong password and submit 5 times within 15 minutes",
+        "Attempt a 6th login with the correct password"
+      ],
+      "test_data": "Email: qa.user@example.com, Wrong: Wrong@999, Correct: Valid@1234",
+      "expected_result": "After the 5th failure the account is locked; the 6th attempt with the correct password is rejected with a lockout message",
+      "jira_key": "AUT-10"
+    },
+    {
+      "id": "TC-009",
+      "title": "4 failed attempts do not lock the account",
+      "type": "edge",
+      "priority": "High",
+      "preconditions": "Registered user account with no recent failed attempts",
+      "steps": [
+        "Submit wrong password 4 times",
+        "Submit the correct password"
+      ],
+      "test_data": "Email: qa.user@example.com",
+      "expected_result": "Account is not locked; 5th attempt with correct password logs in and redirects to /dashboard",
+      "jira_key": "AUT-11"
+    },
+    {
+      "id": "TC-010",
+      "title": "Failed attempts spread over more than 15 minutes do not lock",
+      "type": "edge",
+      "priority": "Medium",
+      "preconditions": "Registered user account; ability to control time or wait",
+      "steps": [
+        "Submit wrong password 3 times",
+        "Wait more than 15 minutes",
+        "Submit wrong password 2 more times",
+        "Submit correct password"
+      ],
+      "test_data": "Email: qa.user@example.com",
+      "expected_result": "Account is not locked because only 2 failures fall within the latest 15-minute window; login succeeds",
+      "jira_key": "AUT-12"
+    },
+    {
+      "id": "TC-011",
+      "title": "Account unlocks after 15-minute lockout period",
+      "type": "edge",
+      "priority": "High",
+      "preconditions": "Account is locked as in TC-008",
+      "steps": [
+        "Wait just under 15 minutes and try the correct password",
+        "Wait until 15 minutes have passed and try the correct password again"
+      ],
+      "test_data": "Email: qa.user@example.com, Password: Valid@1234",
+      "expected_result": "Attempt before 15 minutes is rejected; attempt after 15 minutes succeeds and redirects to /dashboard",
+      "jira_key": "AUT-13"
+    },
+    {
+      "id": "TC-012",
+      "title": "Remember Me keeps user signed in after browser restart",
+      "type": "positive",
+      "priority": "High",
+      "preconditions": "Registered user account",
+      "steps": [
+        "Enter valid credentials",
+        "Check Remember Me",
+        "Log in",
+        "Close and reopen the browser",
+        "Open the application"
+      ],
+      "test_data": "Email: qa.user@example.com, Password: Valid@1234",
+      "expected_result": "User is still signed in and lands on /dashboard without logging in again; session cookie expiry is about 30 days",
+      "jira_key": "AUT-14"
+    },
+    {
+      "id": "TC-013",
+      "title": "Without Remember Me the session ends when browser closes",
+      "type": "positive",
+      "priority": "Medium",
+      "preconditions": "Registered user account",
+      "steps": [
+        "Log in without checking Remember Me",
+        "Close and reopen the browser",
+        "Open /dashboard"
+      ],
+      "test_data": "Email: qa.user@example.com, Password: Valid@1234",
+      "expected_result": "User is redirected to the login page",
+      "jira_key": "AUT-15"
+    },
+    {
+      "id": "TC-014",
+      "title": "Remember Me session expires after 30 days",
+      "type": "edge",
+      "priority": "Medium",
+      "preconditions": "Logged in with Remember Me; ability to advance time or edit cookie expiry in test environment",
+      "steps": [
+        "Advance time to 29 days and open /dashboard",
+        "Advance time beyond 30 days and open /dashboard"
+      ],
+      "test_data": "",
+      "expected_result": "At 29 days the user is still signed in; after 30 days the user is redirected to login",
+      "jira_key": "AUT-16"
+    },
+    {
+      "id": "TC-015",
+      "title": "Password is masked and show/hide toggle works",
+      "type": "positive",
+      "priority": "Medium",
+      "preconditions": "User is on the login page",
+      "steps": [
+        "Type a password",
+        "Verify characters are masked",
+        "Click the show toggle",
+        "Click the hide toggle"
+      ],
+      "test_data": "Password: Valid@1234",
+      "expected_result": "Password is masked by default, shown as plain text after Show, masked again after Hide; typed value is unchanged",
+      "jira_key": "AUT-17"
+    },
+    {
+      "id": "TC-016",
+      "title": "SQL injection and script input are handled safely",
+      "type": "security",
+      "priority": "High",
+      "preconditions": "User is on the login page",
+      "steps": [
+        "Enter injection payloads in email and password",
+        "Click Log in"
+      ],
+      "test_data": "' OR '1'='1' --, <script>alert(1)</script>",
+      "expected_result": "Login fails with the generic error; no script executes; no database error or stack trace is shown",
+      "jira_key": "AUT-18"
+    },
+    {
+      "id": "TC-017",
+      "title": "Credentials are sent securely and not exposed",
+      "type": "security",
+      "priority": "High",
+      "preconditions": "Browser developer tools open",
+      "steps": [
+        "Log in with valid credentials",
+        "Inspect the network request and the URL",
+        "Inspect session cookies"
+      ],
+      "test_data": "Email: qa.user@example.com, Password: Valid@1234",
+      "expected_result": "Request uses HTTPS and POST; password is not in the URL or logs; session cookie has Secure, HttpOnly and SameSite flags",
+      "jira_key": "AUT-19"
+    },
+    {
+      "id": "TC-018",
+      "title": "Dashboard is not accessible without logging in",
+      "type": "security",
+      "priority": "High",
+      "preconditions": "User is logged out",
+      "steps": [
+        "Open /dashboard directly in the browser"
+      ],
+      "test_data": "",
+      "expected_result": "User is redirected to the login page",
+      "jira_key": "AUT-20"
+    },
+    {
+      "id": "TC-019",
+      "title": "Email field trims spaces and ignores case",
+      "type": "edge",
+      "priority": "Low",
+      "preconditions": "Registered user qa.user@example.com",
+      "steps": [
+        "Enter the email with leading/trailing spaces and uppercase letters",
+        "Enter the correct password",
+        "Click Log in"
+      ],
+      "test_data": "Email: '  QA.User@Example.com  ', Password: Valid@1234",
+      "expected_result": "Login succeeds (confirm expected behaviour with product owner if not specified)",
+      "jira_key": "AUT-21"
+    },
+    {
+      "id": "TC-020",
+      "title": "Login form is fully keyboard accessible",
+      "type": "accessibility",
+      "priority": "Medium",
+      "preconditions": "User is on the login page",
+      "steps": [
+        "Use Tab to move through email, password, show/hide toggle, Remember Me and Log in",
+        "Press Space on the toggle and checkbox",
+        "Press Enter to submit"
+      ],
+      "test_data": "Email: qa.user@example.com, Password: Valid@1234",
+      "expected_result": "Logical focus order, visible focus indicator on each control, all controls work by keyboard, Enter submits the form",
+      "jira_key": "AUT-22"
+    },
+    {
+      "id": "TC-021",
+      "title": "Screen reader announces labels and errors",
+      "type": "accessibility",
+      "priority": "Medium",
+      "preconditions": "Screen reader enabled (NVDA or VoiceOver)",
+      "steps": [
+        "Navigate the form with the screen reader",
+        "Submit with empty fields",
+        "Focus the show/hide toggle"
+      ],
+      "test_data": "",
+      "expected_result": "Fields have announced labels; errors are announced and linked to their fields; the toggle announces its state (e.g. 'Show password')",
+      "jira_key": "AUT-23"
+    }
+  ]
+}

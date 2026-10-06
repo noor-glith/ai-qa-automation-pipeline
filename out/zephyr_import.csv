@@ -1,0 +1,62 @@
+﻿Name,Objective,Precondition,Priority,Status,Labels,Coverage (Issues),Step,Test Data,Expected Result
+[TC-001] Login with valid email and password,User is authenticated and redirected to /dashboard,"Registered, active user account exists",High,Draft,"ai-generated,positive",AUT-2,Open the login page,"Email: qa.user@example.com, Password: Valid@1234",
+,,,,,,,Enter a valid registered email,,
+,,,,,,,Enter the correct password,,
+,,,,,,,Click Log in,,User is authenticated and redirected to /dashboard
+[TC-002] Submit with empty email and password,Required-field errors are shown for both fields; no login request is sent; user stays on login page,User is on the login page,High,Draft,"ai-generated,negative",AUT-2,Leave email and password empty,,
+,,,,,,,Click Log in,,Required-field errors are shown for both fields; no login request is sent; user stays on login page
+[TC-003] Submit with email only (password empty),Password required error is shown; login is not attempted,User is on the login page,Normal,Draft,"ai-generated,negative",AUT-2,Enter a valid email,Email: qa.user@example.com,
+,,,,,,,Leave password empty,,
+,,,,,,,Click Log in,,Password required error is shown; login is not attempted
+[TC-004] Submit with password only (email empty),Email required error is shown; login is not attempted,User is on the login page,Normal,Draft,"ai-generated,negative",AUT-2,Leave email empty,Password: Valid@1234,
+,,,,,,,Enter a password,,
+,,,,,,,Click Log in,,Email required error is shown; login is not attempted
+[TC-005] Login with wrong password,Generic error such as 'Invalid email or password' is shown; user stays on login page,Registered user account exists,High,Draft,"ai-generated,negative",AUT-2,Enter a valid registered email,"Email: qa.user@example.com, Password: Wrong@999",
+,,,,,,,Enter an incorrect password,,
+,,,,,,,Click Log in,,Generic error such as 'Invalid email or password' is shown; user stays on login page
+[TC-006] Login with unregistered email shows same generic error,"Same generic error message and similar response time as TC-005, so it does not reveal whether the account exists",Email is not registered,High,Draft,"ai-generated,security",AUT-2,Enter an unregistered email,"Email: nobody.here@example.com, Password: Any@1234",
+,,,,,,,Enter any password,,
+,,,,,,,Click Log in,,
+,,,,,,,Compare the error with TC-005,,"Same generic error message and similar response time as TC-005, so it does not reveal whether the account exists"
+[TC-007] Invalid email format is rejected,Validation error for invalid email format is shown for each value,User is on the login page,Normal,Draft,"ai-generated,negative",AUT-2,Enter a malformed email,"Emails: plainaddress, user@, @example.com, user@@example.com",
+,,,,,,,Enter a password,,
+,,,,,,,Click Log in,,Validation error for invalid email format is shown for each value
+[TC-008] Account locks after 5 failed attempts within 15 minutes,After the 5th failure the account is locked; the 6th attempt with the correct password is rejected with a lockout message,Registered user account with no recent failed attempts,High,Draft,"ai-generated,negative",AUT-2,Enter valid email with wrong password and submit 5 times within 15 minutes,"Email: qa.user@example.com, Wrong: Wrong@999, Correct: Valid@1234",
+,,,,,,,Attempt a 6th login with the correct password,,After the 5th failure the account is locked; the 6th attempt with the correct password is rejected with a lockout message
+[TC-009] 4 failed attempts do not lock the account,Account is not locked; 5th attempt with correct password logs in and redirects to /dashboard,Registered user account with no recent failed attempts,High,Draft,"ai-generated,edge",AUT-2,Submit wrong password 4 times,Email: qa.user@example.com,
+,,,,,,,Submit the correct password,,Account is not locked; 5th attempt with correct password logs in and redirects to /dashboard
+[TC-010] Failed attempts spread over more than 15 minutes do not lock,Account is not locked because only 2 failures fall within the latest 15-minute window; login succeeds,Registered user account; ability to control time or wait,Normal,Draft,"ai-generated,edge",AUT-2,Submit wrong password 3 times,Email: qa.user@example.com,
+,,,,,,,Wait more than 15 minutes,,
+,,,,,,,Submit wrong password 2 more times,,
+,,,,,,,Submit correct password,,Account is not locked because only 2 failures fall within the latest 15-minute window; login succeeds
+[TC-011] Account unlocks after 15-minute lockout period,Attempt before 15 minutes is rejected; attempt after 15 minutes succeeds and redirects to /dashboard,Account is locked as in TC-008,High,Draft,"ai-generated,edge",AUT-2,Wait just under 15 minutes and try the correct password,"Email: qa.user@example.com, Password: Valid@1234",
+,,,,,,,Wait until 15 minutes have passed and try the correct password again,,Attempt before 15 minutes is rejected; attempt after 15 minutes succeeds and redirects to /dashboard
+[TC-012] Remember Me keeps user signed in after browser restart,User is still signed in and lands on /dashboard without logging in again; session cookie expiry is about 30 days,Registered user account,High,Draft,"ai-generated,positive",AUT-2,Enter valid credentials,"Email: qa.user@example.com, Password: Valid@1234",
+,,,,,,,Check Remember Me,,
+,,,,,,,Log in,,
+,,,,,,,Close and reopen the browser,,
+,,,,,,,Open the application,,User is still signed in and lands on /dashboard without logging in again; session cookie expiry is about 30 days
+[TC-013] Without Remember Me the session ends when browser closes,User is redirected to the login page,Registered user account,Normal,Draft,"ai-generated,positive",AUT-2,Log in without checking Remember Me,"Email: qa.user@example.com, Password: Valid@1234",
+,,,,,,,Close and reopen the browser,,
+,,,,,,,Open /dashboard,,User is redirected to the login page
+[TC-014] Remember Me session expires after 30 days,At 29 days the user is still signed in; after 30 days the user is redirected to login,Logged in with Remember Me; ability to advance time or edit cookie expiry in test environment,Normal,Draft,"ai-generated,edge",AUT-2,Advance time to 29 days and open /dashboard,,
+,,,,,,,Advance time beyond 30 days and open /dashboard,,At 29 days the user is still signed in; after 30 days the user is redirected to login
+[TC-015] Password is masked and show/hide toggle works,"Password is masked by default, shown as plain text after Show, masked again after Hide; typed value is unchanged",User is on the login page,Normal,Draft,"ai-generated,positive",AUT-2,Type a password,Password: Valid@1234,
+,,,,,,,Verify characters are masked,,
+,,,,,,,Click the show toggle,,
+,,,,,,,Click the hide toggle,,"Password is masked by default, shown as plain text after Show, masked again after Hide; typed value is unchanged"
+[TC-016] SQL injection and script input are handled safely,Login fails with the generic error; no script executes; no database error or stack trace is shown,User is on the login page,High,Draft,"ai-generated,security",AUT-2,Enter injection payloads in email and password,"' OR '1'='1' --, <script>alert(1)</script>",
+,,,,,,,Click Log in,,Login fails with the generic error; no script executes; no database error or stack trace is shown
+[TC-017] Credentials are sent securely and not exposed,"Request uses HTTPS and POST; password is not in the URL or logs; session cookie has Secure, HttpOnly and SameSite flags",Browser developer tools open,High,Draft,"ai-generated,security",AUT-2,Log in with valid credentials,"Email: qa.user@example.com, Password: Valid@1234",
+,,,,,,,Inspect the network request and the URL,,
+,,,,,,,Inspect session cookies,,"Request uses HTTPS and POST; password is not in the URL or logs; session cookie has Secure, HttpOnly and SameSite flags"
+[TC-018] Dashboard is not accessible without logging in,User is redirected to the login page,User is logged out,High,Draft,"ai-generated,security",AUT-2,Open /dashboard directly in the browser,,User is redirected to the login page
+[TC-019] Email field trims spaces and ignores case,Login succeeds (confirm expected behaviour with product owner if not specified),Registered user qa.user@example.com,Low,Draft,"ai-generated,edge",AUT-2,Enter the email with leading/trailing spaces and uppercase letters,"Email: '  QA.User@Example.com  ', Password: Valid@1234",
+,,,,,,,Enter the correct password,,
+,,,,,,,Click Log in,,Login succeeds (confirm expected behaviour with product owner if not specified)
+[TC-020] Login form is fully keyboard accessible,"Logical focus order, visible focus indicator on each control, all controls work by keyboard, Enter submits the form",User is on the login page,Normal,Draft,"ai-generated,accessibility",AUT-2,"Use Tab to move through email, password, show/hide toggle, Remember Me and Log in","Email: qa.user@example.com, Password: Valid@1234",
+,,,,,,,Press Space on the toggle and checkbox,,
+,,,,,,,Press Enter to submit,,"Logical focus order, visible focus indicator on each control, all controls work by keyboard, Enter submits the form"
+[TC-021] Screen reader announces labels and errors,Fields have announced labels; errors are announced and linked to their fields; the toggle announces its state (e.g. 'Show password'),Screen reader enabled (NVDA or VoiceOver),Normal,Draft,"ai-generated,accessibility",AUT-2,Navigate the form with the screen reader,,
+,,,,,,,Submit with empty fields,,
+,,,,,,,Focus the show/hide toggle,,Fields have announced labels; errors are announced and linked to their fields; the toggle announces its state (e.g. 'Show password')

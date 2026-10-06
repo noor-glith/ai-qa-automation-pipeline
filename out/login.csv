@@ -1,0 +1,62 @@
+﻿ID,Title,Type,Priority,Preconditions,Steps,Test Data,Expected Result,Jira Key,Automation Status
+TC-001,Login with valid email and password,positive,High,"Registered, active user account exists","1. Open the login page
+2. Enter a valid registered email
+3. Enter the correct password
+4. Click Log in","Email: qa.user@example.com, Password: Valid@1234",User is authenticated and redirected to /dashboard,AUT-3,Not automated
+TC-002,Submit with empty email and password,negative,High,User is on the login page,"1. Leave email and password empty
+2. Click Log in",,Required-field errors are shown for both fields; no login request is sent; user stays on login page,AUT-4,Not automated
+TC-003,Submit with email only (password empty),negative,Medium,User is on the login page,"1. Enter a valid email
+2. Leave password empty
+3. Click Log in",Email: qa.user@example.com,Password required error is shown; login is not attempted,AUT-5,Not automated
+TC-004,Submit with password only (email empty),negative,Medium,User is on the login page,"1. Leave email empty
+2. Enter a password
+3. Click Log in",Password: Valid@1234,Email required error is shown; login is not attempted,AUT-6,Not automated
+TC-005,Login with wrong password,negative,High,Registered user account exists,"1. Enter a valid registered email
+2. Enter an incorrect password
+3. Click Log in","Email: qa.user@example.com, Password: Wrong@999",Generic error such as 'Invalid email or password' is shown; user stays on login page,AUT-7,Not automated
+TC-006,Login with unregistered email shows same generic error,security,High,Email is not registered,"1. Enter an unregistered email
+2. Enter any password
+3. Click Log in
+4. Compare the error with TC-005","Email: nobody.here@example.com, Password: Any@1234","Same generic error message and similar response time as TC-005, so it does not reveal whether the account exists",AUT-8,Not automated
+TC-007,Invalid email format is rejected,negative,Medium,User is on the login page,"1. Enter a malformed email
+2. Enter a password
+3. Click Log in","Emails: plainaddress, user@, @example.com, user@@example.com",Validation error for invalid email format is shown for each value,AUT-9,Not automated
+TC-008,Account locks after 5 failed attempts within 15 minutes,negative,High,Registered user account with no recent failed attempts,"1. Enter valid email with wrong password and submit 5 times within 15 minutes
+2. Attempt a 6th login with the correct password","Email: qa.user@example.com, Wrong: Wrong@999, Correct: Valid@1234",After the 5th failure the account is locked; the 6th attempt with the correct password is rejected with a lockout message,AUT-10,Not automated
+TC-009,4 failed attempts do not lock the account,edge,High,Registered user account with no recent failed attempts,"1. Submit wrong password 4 times
+2. Submit the correct password",Email: qa.user@example.com,Account is not locked; 5th attempt with correct password logs in and redirects to /dashboard,AUT-11,Not automated
+TC-010,Failed attempts spread over more than 15 minutes do not lock,edge,Medium,Registered user account; ability to control time or wait,"1. Submit wrong password 3 times
+2. Wait more than 15 minutes
+3. Submit wrong password 2 more times
+4. Submit correct password",Email: qa.user@example.com,Account is not locked because only 2 failures fall within the latest 15-minute window; login succeeds,AUT-12,Not automated
+TC-011,Account unlocks after 15-minute lockout period,edge,High,Account is locked as in TC-008,"1. Wait just under 15 minutes and try the correct password
+2. Wait until 15 minutes have passed and try the correct password again","Email: qa.user@example.com, Password: Valid@1234",Attempt before 15 minutes is rejected; attempt after 15 minutes succeeds and redirects to /dashboard,AUT-13,Not automated
+TC-012,Remember Me keeps user signed in after browser restart,positive,High,Registered user account,"1. Enter valid credentials
+2. Check Remember Me
+3. Log in
+4. Close and reopen the browser
+5. Open the application","Email: qa.user@example.com, Password: Valid@1234",User is still signed in and lands on /dashboard without logging in again; session cookie expiry is about 30 days,AUT-14,Not automated
+TC-013,Without Remember Me the session ends when browser closes,positive,Medium,Registered user account,"1. Log in without checking Remember Me
+2. Close and reopen the browser
+3. Open /dashboard","Email: qa.user@example.com, Password: Valid@1234",User is redirected to the login page,AUT-15,Not automated
+TC-014,Remember Me session expires after 30 days,edge,Medium,Logged in with Remember Me; ability to advance time or edit cookie expiry in test environment,"1. Advance time to 29 days and open /dashboard
+2. Advance time beyond 30 days and open /dashboard",,At 29 days the user is still signed in; after 30 days the user is redirected to login,AUT-16,Not automated
+TC-015,Password is masked and show/hide toggle works,positive,Medium,User is on the login page,"1. Type a password
+2. Verify characters are masked
+3. Click the show toggle
+4. Click the hide toggle",Password: Valid@1234,"Password is masked by default, shown as plain text after Show, masked again after Hide; typed value is unchanged",AUT-17,Not automated
+TC-016,SQL injection and script input are handled safely,security,High,User is on the login page,"1. Enter injection payloads in email and password
+2. Click Log in","' OR '1'='1' --, <script>alert(1)</script>",Login fails with the generic error; no script executes; no database error or stack trace is shown,AUT-18,Not automated
+TC-017,Credentials are sent securely and not exposed,security,High,Browser developer tools open,"1. Log in with valid credentials
+2. Inspect the network request and the URL
+3. Inspect session cookies","Email: qa.user@example.com, Password: Valid@1234","Request uses HTTPS and POST; password is not in the URL or logs; session cookie has Secure, HttpOnly and SameSite flags",AUT-19,Not automated
+TC-018,Dashboard is not accessible without logging in,security,High,User is logged out,1. Open /dashboard directly in the browser,,User is redirected to the login page,AUT-20,Not automated
+TC-019,Email field trims spaces and ignores case,edge,Low,Registered user qa.user@example.com,"1. Enter the email with leading/trailing spaces and uppercase letters
+2. Enter the correct password
+3. Click Log in","Email: '  QA.User@Example.com  ', Password: Valid@1234",Login succeeds (confirm expected behaviour with product owner if not specified),AUT-21,Not automated
+TC-020,Login form is fully keyboard accessible,accessibility,Medium,User is on the login page,"1. Use Tab to move through email, password, show/hide toggle, Remember Me and Log in
+2. Press Space on the toggle and checkbox
+3. Press Enter to submit","Email: qa.user@example.com, Password: Valid@1234","Logical focus order, visible focus indicator on each control, all controls work by keyboard, Enter submits the form",AUT-22,Not automated
+TC-021,Screen reader announces labels and errors,accessibility,Medium,Screen reader enabled (NVDA or VoiceOver),"1. Navigate the form with the screen reader
+2. Submit with empty fields
+3. Focus the show/hide toggle",,Fields have announced labels; errors are announced and linked to their fields; the toggle announces its state (e.g. 'Show password'),AUT-23,Not automated
